@@ -1,612 +1,604 @@
-<!-- ============================================================
-  IB Biology — Aral Sea Fish Survival Simulation
-  WordPress-compatible HTML block (no DOCTYPE / html / head / body)
-  Paste into: WordPress Editor > Custom HTML block
-  All classes namespaced with "sfsim-" to avoid theme conflicts.
-  All JS wrapped in IIFE — zero global scope pollution.
-  Species: Salmo trutta aralensis / Luciobarbus brachycephalus / Pungitius platygaster aralensis
-  ============================================================ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aral Sea Fish Survival Simulation — IB Biology</title>
 
-<!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<style>
-/* ── All rules scoped under #sfsim-root to prevent WP theme bleed ── */
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       PART 1 — html/body reset
+       Prevents browser default margins creating phantom scroll
+       when served as a standalone page by GitHub Pages.
+       ═══════════════════════════════════════════════════════════ */
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;       /* no horizontal scroll on any viewport */
+      background: #f5f4f0;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
 
-#sfsim-root {
-  --sfsim-bg:         #f5f4f0;
-  --sfsim-surface:    #ffffff;
-  --sfsim-surface2:   #f0efe9;
-  --sfsim-border:     #e0ddd5;
-  --sfsim-text:       #1a1a18;
-  --sfsim-text-sec:   #6b6960;
-  --sfsim-text-muted: #a09d95;
-  --sfsim-accent:     #2d5a27;
-  --sfsim-accent-lt:  #e8f0e6;
-  --sfsim-sp-a:       #e05c3a;
-  --sfsim-sp-b:       #3a7ab8;
-  --sfsim-sp-c:       #2d8a5e;
-  --sfsim-warn:       #c9593a;
-  --sfsim-mono:       'DM Mono', 'Courier New', monospace;
-  --sfsim-sans:       'DM Sans', system-ui, -apple-system, sans-serif;
-  --sfsim-radius:     10px;
-  --sfsim-shadow:     0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    /* ── CSS custom properties ── */
+    :root {
+      --sfsim-bg:         #f5f4f0;
+      --sfsim-surface:    #ffffff;
+      --sfsim-surface2:   #f0efe9;
+      --sfsim-border:     #e0ddd5;
+      --sfsim-text:       #1a1a18;
+      --sfsim-text-sec:   #6b6960;
+      --sfsim-text-muted: #a09d95;
+      --sfsim-accent:     #2d5a27;
+      --sfsim-accent-lt:  #e8f0e6;
+      --sfsim-sp-a:       #e05c3a;
+      --sfsim-sp-b:       #3a7ab8;
+      --sfsim-sp-c:       #2d8a5e;
+      --sfsim-warn:       #c9593a;
+      --sfsim-mono:       'DM Mono', 'Courier New', monospace;
+      --sfsim-radius:     10px;
+      --sfsim-shadow:     0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    }
 
-  box-sizing: border-box;
-  font-family: var(--sfsim-sans);
-  background: var(--sfsim-bg);
-  color: var(--sfsim-text);
-  padding: 32px 16px 0;
-  border-radius: 12px;
-  max-width: 960px;
-  margin: 0 auto;
-}
+    *, *::before, *::after { box-sizing: border-box; }
 
-#sfsim-root *, #sfsim-root *::before, #sfsim-root *::after {
-  box-sizing: border-box;
-}
+    /* ── Root wrapper ── */
+    #sfsim-root {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 16px 0;
+      color: var(--sfsim-text);
+    }
 
-/* ── Page header ── */
-#sfsim-root .sfsim-header {
-  text-align: center;
-  max-width: 720px;
-  margin: 0 auto 32px;
-}
-#sfsim-root .sfsim-badge {
-  font-family: var(--sfsim-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--sfsim-accent);
-  background: var(--sfsim-accent-lt);
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 100px;
-  margin-bottom: 14px;
-}
-#sfsim-root .sfsim-header h2 {
-  font-family: var(--sfsim-sans);
-  font-size: clamp(20px, 4vw, 30px);
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  color: var(--sfsim-text);
-  margin: 0 0 10px;
-  padding: 0;
-  border: none;
-}
-#sfsim-root .sfsim-header p {
-  font-size: 14px;
-  color: var(--sfsim-text-sec);
-  line-height: 1.6;
-  margin: 0;
-  padding: 0;
-}
+    /* ══════════════════════════════════════════════
+       PAGE HEADER
+       ══════════════════════════════════════════════ */
+    .sfsim-header {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto 32px;
+    }
+    .sfsim-badge {
+      font-family: var(--sfsim-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sfsim-accent);
+      background: var(--sfsim-accent-lt);
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 14px;
+    }
+    .sfsim-header h1 {
+      font-size: clamp(20px, 4vw, 30px);
+      font-weight: 600;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      color: var(--sfsim-text);
+      margin: 0 0 10px;
+    }
+    .sfsim-header p {
+      font-size: 14px;
+      color: var(--sfsim-text-sec);
+      line-height: 1.6;
+      margin: 0;
+    }
 
-/* ── Simulation layout grid ── */
-#sfsim-root .sfsim-layout {
-  display: grid;
-  grid-template-columns: 285px 1fr;
-  grid-template-rows: auto auto;
-  gap: 16px;
-}
-@media (max-width: 700px) {
-  #sfsim-root .sfsim-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-  }
-  #sfsim-root .sfsim-graph-card { grid-column: 1; grid-row: 2; }
-  #sfsim-root .sfsim-data-panel { grid-column: 1; grid-row: 3; }
-}
+    /* ══════════════════════════════════════════════
+       SIMULATION GRID
+       Desktop:  [285px controls] [1fr graph]
+                 [285px readout ] [      ^   ]
+       Tablet (≤800px): same but narrower controls
+       Mobile (≤640px): single column, stacked
+       ══════════════════════════════════════════════ */
+    .sfsim-layout {
+      display: grid;
+      grid-template-columns: 285px 1fr;
+      grid-template-rows: auto auto;
+      gap: 16px;
+    }
 
-/* ── Card ── */
-#sfsim-root .sfsim-card {
-  background: var(--sfsim-surface);
-  border: 1px solid var(--sfsim-border);
-  border-radius: var(--sfsim-radius);
-  box-shadow: var(--sfsim-shadow);
-  padding: 22px;
-}
-#sfsim-root .sfsim-controls { grid-column: 1; grid-row: 1; }
-#sfsim-root .sfsim-graph-card {
-  grid-column: 2;
-  grid-row: 1 / 3;
-  display: flex;
-  flex-direction: column;
-}
-#sfsim-root .sfsim-data-panel { grid-column: 1; grid-row: 2; }
+    /* ── Tablet: shrink sidebar, keep two columns ── */
+    @media (max-width: 800px) {
+      .sfsim-layout {
+        grid-template-columns: 240px 1fr;
+      }
+    }
 
-/* ── Section title ── */
-#sfsim-root .sfsim-section-title {
-  font-family: var(--sfsim-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--sfsim-text-muted);
-  margin: 0 0 18px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--sfsim-border);
-}
+    /* ── Mobile: single column ── */
+    @media (max-width: 640px) {
+      .sfsim-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+      }
+      .sfsim-graph-card { grid-column: 1 !important; grid-row: 2 !important; }
+      .sfsim-data-panel { grid-column: 1 !important; grid-row: 3 !important; }
+    }
 
-/* ── Sliders ── */
-#sfsim-root .sfsim-ctrl-group { margin-bottom: 20px; }
-#sfsim-root .sfsim-ctrl-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 8px;
-}
-#sfsim-root .sfsim-ctrl-label span:first-child {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--sfsim-text);
-}
-#sfsim-root .sfsim-ctrl-val {
-  font-family: var(--sfsim-mono);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--sfsim-accent);
-  background: var(--sfsim-accent-lt);
-  padding: 2px 8px;
-  border-radius: 5px;
-}
-#sfsim-root input[type=range] {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--sfsim-border);
-  outline: none;
-  cursor: pointer;
-  margin: 0; padding: 0;
-}
-#sfsim-root input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: var(--sfsim-accent);
-  cursor: pointer;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-  transition: transform 0.1s;
-}
-#sfsim-root input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-#sfsim-root input[type=range]::-moz-range-thumb {
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: var(--sfsim-accent);
-  cursor: pointer;
-  border: 2px solid #fff;
-}
-#sfsim-root .sfsim-track-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 5px;
-}
-#sfsim-root .sfsim-track-labels span {
-  font-family: var(--sfsim-mono);
-  font-size: 10px;
-  color: var(--sfsim-text-muted);
-}
+    /* ── Card ── */
+    .sfsim-card {
+      background: var(--sfsim-surface);
+      border: 1px solid var(--sfsim-border);
+      border-radius: var(--sfsim-radius);
+      box-shadow: var(--sfsim-shadow);
+      padding: 22px;
+    }
+    .sfsim-controls   { grid-column: 1; grid-row: 1; }
+    .sfsim-graph-card { grid-column: 2; grid-row: 1 / 3; display: flex; flex-direction: column; }
+    .sfsim-data-panel { grid-column: 1; grid-row: 2; }
 
-/* ── Species toggles ── */
-#sfsim-root .sfsim-toggles { display: flex; flex-direction: column; gap: 9px; }
-#sfsim-root .sfsim-toggle {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  cursor: pointer;
-  padding: 8px 11px;
-  border-radius: 7px;
-  border: 1px solid var(--sfsim-border);
-  transition: background 0.15s;
-  user-select: none;
-}
-#sfsim-root .sfsim-toggle:hover { background: var(--sfsim-surface2); }
-#sfsim-root .sfsim-toggle input[type=checkbox] { display: none; }
-#sfsim-root .sfsim-toggle-dot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-#sfsim-root .sfsim-toggle-dot.a { background: var(--sfsim-sp-a); }
-#sfsim-root .sfsim-toggle-dot.b { background: var(--sfsim-sp-b); }
-#sfsim-root .sfsim-toggle-dot.c { background: var(--sfsim-sp-c); }
-#sfsim-root .sfsim-toggle.off { opacity: 0.42; }
-#sfsim-root .sfsim-toggle-info { flex: 1; min-width: 0; }
-#sfsim-root .sfsim-toggle-name {
-  font-size: 12px;
-  font-weight: 600;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-#sfsim-root .sfsim-toggle-sci {
-  font-size: 10px;
-  font-style: italic;
-  color: var(--sfsim-text-muted);
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+    /* ── Section title ── */
+    .sfsim-section-title {
+      font-family: var(--sfsim-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--sfsim-text-muted);
+      margin: 0 0 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--sfsim-border);
+    }
 
-/* ── Start button ── */
-#sfsim-root .sfsim-btn {
-  display: block;
-  width: 100%;
-  padding: 11px;
-  background: var(--sfsim-accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--sfsim-radius);
-  font-family: var(--sfsim-sans);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  letter-spacing: 0.01em;
-  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-  margin-top: 8px;
-  box-shadow: 0 2px 8px rgba(45,90,39,0.25);
-  text-align: center;
-}
-#sfsim-root .sfsim-btn:hover { background: #234820; box-shadow: 0 4px 14px rgba(45,90,39,0.35); }
-#sfsim-root .sfsim-btn:active { transform: scale(0.98); }
-#sfsim-root .sfsim-btn.running { background: #7a5c2a; box-shadow: 0 2px 8px rgba(122,92,42,0.25); }
+    /* ══════════════════════════════════════════════
+       SLIDERS
+       ══════════════════════════════════════════════ */
+    .sfsim-ctrl-group { margin-bottom: 20px; }
+    .sfsim-ctrl-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .sfsim-ctrl-label span:first-child {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .sfsim-ctrl-val {
+      font-family: var(--sfsim-mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--sfsim-accent);
+      background: var(--sfsim-accent-lt);
+      padding: 2px 8px;
+      border-radius: 5px;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--sfsim-border);
+      outline: none;
+      cursor: pointer;
+      margin: 0; padding: 0;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;   /* slightly larger for touch */
+      border-radius: 50%;
+      background: var(--sfsim-accent);
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      transition: transform 0.1s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    input[type=range]::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--sfsim-accent);
+      cursor: pointer;
+      border: 2px solid #fff;
+    }
+    .sfsim-track-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+    }
+    .sfsim-track-labels span {
+      font-family: var(--sfsim-mono);
+      font-size: 10px;
+      color: var(--sfsim-text-muted);
+    }
 
-/* ── Graph header ── */
-#sfsim-root .sfsim-graph-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-#sfsim-root .sfsim-legend { display: flex; gap: 16px; flex-wrap: wrap; }
-#sfsim-root .sfsim-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--sfsim-text-sec);
-  line-height: 1.3;
-}
-#sfsim-root .sfsim-legend-item em {
-  font-style: italic;
-  font-size: 10px;
-  display: block;
-  color: var(--sfsim-text-muted);
-}
-#sfsim-root .sfsim-legend-line { width: 18px; height: 2px; border-radius: 1px; flex-shrink: 0; }
-#sfsim-root .sfsim-status {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-family: var(--sfsim-mono);
-  font-size: 11px;
-  color: var(--sfsim-text-muted);
-}
-#sfsim-root .sfsim-status-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--sfsim-border);
-  transition: background 0.3s;
-  flex-shrink: 0;
-}
-#sfsim-root .sfsim-status-dot.running {
-  background: #f0a500;
-  animation: sfsim-pulse 1s infinite;
-}
-#sfsim-root .sfsim-status-dot.complete { background: var(--sfsim-accent); animation: none; }
+    /* ══════════════════════════════════════════════
+       SPECIES TOGGLES
+       ══════════════════════════════════════════════ */
+    .sfsim-toggles { display: flex; flex-direction: column; gap: 9px; }
+    .sfsim-toggle {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      padding: 9px 12px;
+      border-radius: 7px;
+      border: 1px solid var(--sfsim-border);
+      transition: background 0.15s;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .sfsim-toggle:hover { background: var(--sfsim-surface2); }
+    .sfsim-toggle input[type=checkbox] { display: none; }
+    .sfsim-toggle-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sfsim-toggle-dot.a { background: var(--sfsim-sp-a); }
+    .sfsim-toggle-dot.b { background: var(--sfsim-sp-b); }
+    .sfsim-toggle-dot.c { background: var(--sfsim-sp-c); }
+    .sfsim-toggle.off   { opacity: 0.42; }
+    .sfsim-toggle-info  { flex: 1; min-width: 0; }
+    .sfsim-toggle-name {
+      font-size: 12px;
+      font-weight: 600;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sfsim-toggle-sci {
+      font-size: 10px;
+      font-style: italic;
+      color: var(--sfsim-text-muted);
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-@keyframes sfsim-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.25; }
-}
+    /* ══════════════════════════════════════════════
+       START BUTTON
+       ══════════════════════════════════════════════ */
+    .sfsim-btn {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      background: var(--sfsim-accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--sfsim-radius);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      margin-top: 8px;
+      box-shadow: 0 2px 8px rgba(45,90,39,0.25);
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sfsim-btn:hover  { background: #234820; box-shadow: 0 4px 14px rgba(45,90,39,0.35); }
+    .sfsim-btn:active { transform: scale(0.98); }
+    .sfsim-btn.running { background: #7a5c2a; box-shadow: 0 2px 8px rgba(122,92,42,0.25); }
 
-/* ── Canvas ── */
-#sfsim-root .sfsim-canvas-wrap {
-  position: relative;
-  flex: 1;
-  min-height: 330px;
-}
-#sfsim-root canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 6px;
-}
+    /* ══════════════════════════════════════════════
+       GRAPH CARD
+       ══════════════════════════════════════════════ */
+    .sfsim-graph-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sfsim-legend { display: flex; gap: 14px; flex-wrap: wrap; }
+    .sfsim-legend-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--sfsim-text-sec);
+      line-height: 1.3;
+    }
+    .sfsim-legend-item em {
+      font-style: italic;
+      font-size: 10px;
+      display: block;
+      color: var(--sfsim-text-muted);
+    }
+    .sfsim-legend-line { width: 18px; height: 2px; border-radius: 1px; flex-shrink: 0; margin-top: 5px; }
 
-/* ── Live readout panel ── */
-#sfsim-root .sfsim-day {
-  font-family: var(--sfsim-mono);
-  font-size: 24px;
-  font-weight: 500;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-#sfsim-root .sfsim-day span { font-size: 13px; font-weight: 400; color: var(--sfsim-text-muted); }
-#sfsim-root .sfsim-species-rows { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
-#sfsim-root .sfsim-sp-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 11px;
-  border-radius: 7px;
-  border: 1px solid var(--sfsim-border);
-  background: var(--sfsim-surface2);
-  transition: border-color 0.2s, background 0.2s;
-}
-#sfsim-root .sfsim-sp-row.lowest {
-  border-color: var(--sfsim-warn);
-  background: rgba(201,89,58,0.06);
-}
-#sfsim-root .sfsim-sp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-#sfsim-root .sfsim-sp-dot.a { background: var(--sfsim-sp-a); }
-#sfsim-root .sfsim-sp-dot.b { background: var(--sfsim-sp-b); }
-#sfsim-root .sfsim-sp-dot.c { background: var(--sfsim-sp-c); }
-#sfsim-root .sfsim-sp-name-block { flex: 1; min-width: 0; }
-#sfsim-root .sfsim-sp-common { font-size: 11px; font-weight: 600; display: block; }
-#sfsim-root .sfsim-sp-sci-sm { font-size: 10px; font-style: italic; color: var(--sfsim-text-muted); display: block; }
-#sfsim-root .sfsim-sp-bar-wrap { width: 48px; height: 4px; background: var(--sfsim-border); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
-#sfsim-root .sfsim-sp-bar { height: 100%; border-radius: 3px; transition: width 0.15s; }
-#sfsim-root .sfsim-sp-bar.a { background: var(--sfsim-sp-a); }
-#sfsim-root .sfsim-sp-bar.b { background: var(--sfsim-sp-b); }
-#sfsim-root .sfsim-sp-bar.c { background: var(--sfsim-sp-c); }
-#sfsim-root .sfsim-sp-val { font-family: var(--sfsim-mono); font-size: 13px; font-weight: 500; min-width: 42px; text-align: right; flex-shrink: 0; }
-#sfsim-root .sfsim-low-badge {
-  font-family: var(--sfsim-mono);
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  color: var(--sfsim-warn);
-  text-transform: uppercase;
-  opacity: 0;
-  transition: opacity 0.2s;
-  flex-shrink: 0;
-}
-#sfsim-root .sfsim-sp-row.lowest .sfsim-low-badge { opacity: 1; }
-#sfsim-root .sfsim-complete {
-  display: none;
-  margin-top: 14px;
-  padding: 10px 14px;
-  border-radius: 7px;
-  background: var(--sfsim-accent-lt);
-  border: 1px solid rgba(45,90,39,0.2);
-  font-family: var(--sfsim-mono);
-  font-size: 11px;
-  color: var(--sfsim-accent);
-  letter-spacing: 0.04em;
-}
-#sfsim-root .sfsim-complete.visible { display: block; }
+    .sfsim-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--sfsim-mono);
+      font-size: 11px;
+      color: var(--sfsim-text-muted);
+      white-space: nowrap;
+    }
+    .sfsim-status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--sfsim-border);
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+    .sfsim-status-dot.running { background: #f0a500; animation: sfsim-pulse 1s infinite; }
+    .sfsim-status-dot.complete { background: var(--sfsim-accent); animation: none; }
 
-/* ══════════════════════════════════════════════
-   CONSERVATION STATUS PANEL
-   ══════════════════════════════════════════════ */
-#sfsim-root .sfsim-conservation {
-  margin-top: 20px;
-}
-#sfsim-root .sfsim-conservation-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-top: 4px;
-}
-@media (max-width: 600px) {
-  #sfsim-root .sfsim-conservation-grid { grid-template-columns: 1fr; }
-}
-#sfsim-root .sfsim-con-card {
-  border-radius: 9px;
-  border: 1px solid var(--sfsim-border);
-  overflow: hidden;
-  background: var(--sfsim-surface);
-  box-shadow: var(--sfsim-shadow);
-}
-#sfsim-root .sfsim-con-top {
-  padding: 14px 16px 12px;
-  border-bottom: 1px solid var(--sfsim-border);
-}
-#sfsim-root .sfsim-con-sp-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-#sfsim-root .sfsim-con-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-#sfsim-root .sfsim-con-sp-tag {
-  font-family: var(--sfsim-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: var(--sfsim-text-muted);
-  text-transform: uppercase;
-}
-#sfsim-root .sfsim-con-common {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--sfsim-text);
-  display: block;
-  margin-bottom: 2px;
-}
-#sfsim-root .sfsim-con-sci {
-  font-size: 12px;
-  font-style: italic;
-  color: var(--sfsim-text-sec);
-  display: block;
-}
-#sfsim-root .sfsim-iucn-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 10px;
-  padding: 5px 10px;
-  border-radius: 6px;
-  font-family: var(--sfsim-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-}
-/* IUCN colour codes */
-#sfsim-root .iucn-ex   { background: #2b2b2b; color: #fff; }
-#sfsim-root .iucn-cr   { background: #7b0000; color: #fff; }
-#sfsim-root .iucn-en   { background: #c9391a; color: #fff; }
-#sfsim-root .iucn-vu   { background: #e07b10; color: #fff; }
-#sfsim-root .iucn-nt   { background: #6b8c2a; color: #fff; }
-#sfsim-root .iucn-lc   { background: #2d8a2d; color: #fff; }
-#sfsim-root .iucn-dd   { background: #607080; color: #fff; }
-/* Extinct (regional) — custom dark grey */
-#sfsim-root .iucn-rex  { background: #444444; color: #fff; }
+    @keyframes sfsim-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.25; }
+    }
 
-#sfsim-root .sfsim-iucn-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.55);
-  flex-shrink: 0;
-}
-#sfsim-root .sfsim-con-body {
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-#sfsim-root .sfsim-con-row {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-#sfsim-root .sfsim-con-row-label {
-  font-family: var(--sfsim-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--sfsim-text-muted);
-}
-#sfsim-root .sfsim-con-row-val {
-  font-size: 12px;
-  color: var(--sfsim-text);
-  line-height: 1.5;
-}
-#sfsim-root .sfsim-con-row-val a {
-  color: var(--sfsim-accent);
-  text-decoration: underline;
-  font-size: 11px;
-}
+    /* Canvas wrap — taller on mobile since it's the primary content */
+    .sfsim-canvas-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 330px;
+    }
+    @media (max-width: 640px) {
+      .sfsim-canvas-wrap { min-height: 280px; }
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
+    }
 
-/* ══════════════════════════════════════════════
-   REFERENCES SECTION
-   ══════════════════════════════════════════════ */
-#sfsim-root .sfsim-references {
-  margin-top: 20px;
-  padding: 20px 22px;
-  background: var(--sfsim-surface);
-  border: 1px solid var(--sfsim-border);
-  border-radius: var(--sfsim-radius);
-  box-shadow: var(--sfsim-shadow);
-}
-#sfsim-root .sfsim-ref-list {
-  list-style: none;
-  margin: 6px 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-#sfsim-root .sfsim-ref-list li {
-  display: flex;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--sfsim-text-sec);
-  line-height: 1.55;
-  padding: 0; margin: 0;
-}
-#sfsim-root .sfsim-ref-num {
-  font-family: var(--sfsim-mono);
-  font-size: 10px;
-  color: var(--sfsim-text-muted);
-  min-width: 20px;
-  padding-top: 2px;
-  flex-shrink: 0;
-}
-#sfsim-root .sfsim-ref-list a {
-  color: var(--sfsim-accent);
-  text-decoration: underline;
-  word-break: break-all;
-}
-#sfsim-root .sfsim-ref-list em { font-style: italic; }
+    /* ══════════════════════════════════════════════
+       LIVE READOUT PANEL
+       ══════════════════════════════════════════════ */
+    .sfsim-day {
+      font-family: var(--sfsim-mono);
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .sfsim-day span { font-size: 13px; font-weight: 400; color: var(--sfsim-text-muted); }
+    .sfsim-species-rows { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+    .sfsim-sp-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 7px;
+      border: 1px solid var(--sfsim-border);
+      background: var(--sfsim-surface2);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .sfsim-sp-row.lowest {
+      border-color: var(--sfsim-warn);
+      background: rgba(201,89,58,0.06);
+    }
+    .sfsim-sp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sfsim-sp-dot.a { background: var(--sfsim-sp-a); }
+    .sfsim-sp-dot.b { background: var(--sfsim-sp-b); }
+    .sfsim-sp-dot.c { background: var(--sfsim-sp-c); }
+    .sfsim-sp-name-block { flex: 1; min-width: 0; }
+    .sfsim-sp-common { font-size: 11px; font-weight: 600; display: block; }
+    .sfsim-sp-sci-sm { font-size: 10px; font-style: italic; color: var(--sfsim-text-muted); display: block; }
+    .sfsim-sp-bar-wrap { width: 48px; height: 4px; background: var(--sfsim-border); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+    .sfsim-sp-bar { height: 100%; border-radius: 3px; transition: width 0.15s; }
+    .sfsim-sp-bar.a { background: var(--sfsim-sp-a); }
+    .sfsim-sp-bar.b { background: var(--sfsim-sp-b); }
+    .sfsim-sp-bar.c { background: var(--sfsim-sp-c); }
+    .sfsim-sp-val {
+      font-family: var(--sfsim-mono);
+      font-size: 13px;
+      font-weight: 500;
+      min-width: 42px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .sfsim-low-badge {
+      font-family: var(--sfsim-mono);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      color: var(--sfsim-warn);
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+    .sfsim-sp-row.lowest .sfsim-low-badge { opacity: 1; }
+    .sfsim-complete {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 7px;
+      background: var(--sfsim-accent-lt);
+      border: 1px solid rgba(45,90,39,0.2);
+      font-family: var(--sfsim-mono);
+      font-size: 11px;
+      color: var(--sfsim-accent);
+      letter-spacing: 0.04em;
+    }
+    .sfsim-complete.visible { display: block; }
 
-/* ══════════════════════════════════════════════
-   FOOTER
-   ══════════════════════════════════════════════ */
-#sfsim-root .sfsim-footer {
-  margin-top: 20px;
-  padding: 18px 22px;
-  background: var(--sfsim-text);
-  border-radius: var(--sfsim-radius);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-#sfsim-root .sfsim-footer-left {
-  font-size: 12px;
-  color: rgba(255,255,255,0.55);
-  line-height: 1.5;
-}
-#sfsim-root .sfsim-footer-left strong {
-  color: rgba(255,255,255,0.85);
-  font-weight: 500;
-  display: block;
-  font-size: 13px;
-  margin-bottom: 2px;
-}
-#sfsim-root .sfsim-footer-right { flex-shrink: 0; }
-#sfsim-root .sfsim-contact-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 16px;
-  background: var(--sfsim-accent);
-  color: #fff;
-  border-radius: 7px;
-  font-family: var(--sfsim-sans);
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.15s;
-  white-space: nowrap;
-}
-#sfsim-root .sfsim-contact-btn:hover { background: #3a7234; text-decoration: none; color: #fff; }
-#sfsim-root .sfsim-contact-icon {
-  width: 15px; height: 15px;
-  flex-shrink: 0;
-}
+    /* ══════════════════════════════════════════════
+       CONSERVATION STATUS PANEL
+       Desktop: 3 columns
+       Tablet:  3 columns (slightly narrower)
+       Mobile:  1 column
+       ══════════════════════════════════════════════ */
+    .sfsim-conservation { margin-top: 20px; }
+    .sfsim-conservation-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 4px;
+    }
+    @media (max-width: 640px) {
+      .sfsim-conservation-grid { grid-template-columns: 1fr; }
+    }
+    .sfsim-con-card {
+      border-radius: 9px;
+      border: 1px solid var(--sfsim-border);
+      overflow: hidden;
+      background: var(--sfsim-surface);
+      box-shadow: var(--sfsim-shadow);
+    }
+    .sfsim-con-top {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--sfsim-border);
+    }
+    .sfsim-con-sp-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .sfsim-con-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .sfsim-con-sp-tag {
+      font-family: var(--sfsim-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--sfsim-text-muted);
+      text-transform: uppercase;
+    }
+    .sfsim-con-common { font-size: 14px; font-weight: 600; display: block; margin-bottom: 2px; }
+    .sfsim-con-sci    { font-size: 12px; font-style: italic; color: var(--sfsim-text-sec); display: block; }
+    .sfsim-iucn-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-family: var(--sfsim-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+    .iucn-rex { background: #444444; color: #fff; }
+    .iucn-en  { background: #c9391a; color: #fff; }
+    .iucn-lc  { background: #2d8a2d; color: #fff; }
+    .sfsim-iucn-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.55); flex-shrink: 0; }
+    .sfsim-con-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 9px; }
+    .sfsim-con-row  { display: flex; flex-direction: column; gap: 2px; }
+    .sfsim-con-row-label {
+      font-family: var(--sfsim-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sfsim-text-muted);
+    }
+    .sfsim-con-row-val { font-size: 12px; color: var(--sfsim-text); line-height: 1.5; }
+    .sfsim-con-row-val a { color: var(--sfsim-accent); font-size: 11px; }
 
-/* Bottom padding wrapper */
-#sfsim-root .sfsim-bottom-wrap { padding-bottom: 40px; }
-</style>
+    /* ══════════════════════════════════════════════
+       REFERENCES
+       ══════════════════════════════════════════════ */
+    .sfsim-references {
+      margin-top: 20px;
+      padding: 20px 22px;
+      background: var(--sfsim-surface);
+      border: 1px solid var(--sfsim-border);
+      border-radius: var(--sfsim-radius);
+      box-shadow: var(--sfsim-shadow);
+    }
+    .sfsim-ref-list {
+      list-style: none;
+      margin: 6px 0 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sfsim-ref-list li {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--sfsim-text-sec);
+      line-height: 1.55;
+      margin: 0; padding: 0;
+    }
+    .sfsim-ref-num {
+      font-family: var(--sfsim-mono);
+      font-size: 10px;
+      color: var(--sfsim-text-muted);
+      min-width: 20px;
+      padding-top: 2px;
+      flex-shrink: 0;
+    }
+    .sfsim-ref-list a  { color: var(--sfsim-accent); word-break: break-all; }
+    .sfsim-ref-list em { font-style: italic; }
 
-<!-- ════════════════════════════════════════════
-     ROOT CONTAINER
-     ════════════════════════════════════════════ -->
+    /* ══════════════════════════════════════════════
+       FOOTER
+       ══════════════════════════════════════════════ */
+    .sfsim-footer {
+      margin-top: 20px;
+      padding: 18px 22px;
+      background: var(--sfsim-text);
+      border-radius: var(--sfsim-radius);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .sfsim-footer-left { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+    .sfsim-footer-left strong { color: rgba(255,255,255,0.85); font-weight: 500; display: block; font-size: 13px; margin-bottom: 2px; }
+    .sfsim-contact-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      background: var(--sfsim-accent);
+      color: #fff;
+      border-radius: 7px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .sfsim-contact-btn:hover { background: #3a7234; color: #fff; text-decoration: none; }
+    .sfsim-contact-icon { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* Bottom padding so footer never clips in iframe */
+    .sfsim-bottom-wrap { padding-bottom: 48px; }
+
+    /* ══════════════════════════════════════════════
+       IUCN key chips row
+       ══════════════════════════════════════════════ */
+    .sfsim-iucn-key {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+    }
+    .sfsim-iucn-key-label {
+      font-family: var(--sfsim-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sfsim-text-muted);
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+
 <div id="sfsim-root">
 
   <!-- ── Header ── -->
   <div class="sfsim-header">
     <div class="sfsim-badge">IB Biology · Aral Sea Case Study</div>
-    <h2>Salinity &amp; Fish Survival — Aral Sea</h2>
+    <h1>Salinity &amp; Fish Survival — Aral Sea</h1>
     <p>Simulate differential survival of three native Aral Sea species as salinity increases over 14 days.
     Based on documented extinction and survival patterns from the Aral Sea regression crisis (1960s–2000s).</p>
   </div>
 
-  <!-- ── Simulation grid ── -->
+  <!-- ══════════════════════════════════════════════
+       SIMULATION GRID
+       ══════════════════════════════════════════════ -->
   <div class="sfsim-layout">
 
     <!-- CONTROLS -->
@@ -673,25 +665,16 @@
       <div class="sfsim-graph-header">
         <div class="sfsim-legend">
           <div class="sfsim-legend-item">
-            <div class="sfsim-legend-line" style="background:#e05c3a;margin-top:3px;"></div>
-            <div>
-              Aral Trout
-              <em>S. trutta aralensis</em>
-            </div>
+            <div class="sfsim-legend-line" style="background:#e05c3a;"></div>
+            <div>Aral Trout<em>S. trutta aralensis</em></div>
           </div>
           <div class="sfsim-legend-item">
-            <div class="sfsim-legend-line" style="background:#3a7ab8;margin-top:3px;"></div>
-            <div>
-              Aral Barbel
-              <em>L. brachycephalus</em>
-            </div>
+            <div class="sfsim-legend-line" style="background:#3a7ab8;"></div>
+            <div>Aral Barbel<em>L. brachycephalus</em></div>
           </div>
           <div class="sfsim-legend-item">
-            <div class="sfsim-legend-line" style="background:#2d8a5e;margin-top:3px;"></div>
-            <div>
-              Stickleback
-              <em>P. platygaster aralensis</em>
-            </div>
+            <div class="sfsim-legend-line" style="background:#2d8a5e;"></div>
+            <div>Stickleback<em>P. platygaster aralensis</em></div>
           </div>
         </div>
         <div class="sfsim-status">
@@ -710,7 +693,6 @@
       <div class="sfsim-day">Day <span id="sfsim-dayNum">&mdash;</span></div>
 
       <div class="sfsim-species-rows">
-
         <div class="sfsim-sp-row" id="sfsim-rowA">
           <span class="sfsim-sp-dot a"></span>
           <span class="sfsim-sp-name-block">
@@ -721,7 +703,6 @@
           <span class="sfsim-sp-val" id="sfsim-valA">&mdash;</span>
           <span class="sfsim-low-badge">&#9888;</span>
         </div>
-
         <div class="sfsim-sp-row" id="sfsim-rowB">
           <span class="sfsim-sp-dot b"></span>
           <span class="sfsim-sp-name-block">
@@ -732,7 +713,6 @@
           <span class="sfsim-sp-val" id="sfsim-valB">&mdash;</span>
           <span class="sfsim-low-badge">&#9888;</span>
         </div>
-
         <div class="sfsim-sp-row" id="sfsim-rowC">
           <span class="sfsim-sp-dot c"></span>
           <span class="sfsim-sp-name-block">
@@ -743,7 +723,6 @@
           <span class="sfsim-sp-val" id="sfsim-valC">&mdash;</span>
           <span class="sfsim-low-badge">&#9888;</span>
         </div>
-
       </div>
 
       <div class="sfsim-complete" id="sfsim-completeMsg">
@@ -753,15 +732,14 @@
 
   </div><!-- /.sfsim-layout -->
 
-  <!-- ════════════════════════════════════════════
-       CONSERVATION STATUS PANEL
-       ════════════════════════════════════════════ -->
+  <!-- ══════════════════════════════════════════════
+       CONSERVATION STATUS
+       ══════════════════════════════════════════════ -->
   <div class="sfsim-conservation">
     <div class="sfsim-section-title" style="margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--sfsim-border);">Conservation Status &amp; Species Profiles</div>
-
     <div class="sfsim-conservation-grid">
 
-      <!-- Species A — Aral Trout -->
+      <!-- Species A -->
       <div class="sfsim-con-card">
         <div class="sfsim-con-top">
           <div class="sfsim-con-sp-label">
@@ -771,22 +749,21 @@
           <span class="sfsim-con-common">Aral Trout</span>
           <span class="sfsim-con-sci">Salmo trutta aralensis</span>
           <div class="sfsim-iucn-badge iucn-rex">
-            <span class="sfsim-iucn-dot"></span>
-            Regionally Extinct (RE)
+            <span class="sfsim-iucn-dot"></span>Regionally Extinct (RE)
           </div>
         </div>
         <div class="sfsim-con-body">
           <div class="sfsim-con-row">
             <span class="sfsim-con-row-label">Salinity Tolerance</span>
-            <span class="sfsim-con-row-val">Very low (&lt;8 g/L). As a salmonid, highly sensitive to osmotic stress. Cannot regulate ion balance in brackish water.</span>
+            <span class="sfsim-con-row-val">Very low (&lt;8 g/L). Highly sensitive to osmotic stress as a salmonid; cannot regulate ion balance in brackish water.</span>
           </div>
           <div class="sfsim-con-row">
             <span class="sfsim-con-row-label">Aral Sea Fate</span>
-            <span class="sfsim-con-row-val">Extirpated from the Aral Sea by the 1980s. No confirmed records for &gt;50 years. Likely globally extinct.</span>
+            <span class="sfsim-con-row-val">Extirpated by the 1980s. No confirmed records for &gt;50 years. Likely globally extinct.</span>
           </div>
           <div class="sfsim-con-row">
-            <span class="sfsim-con-row-label">Primary Threat</span>
-            <span class="sfsim-con-row-val">Salinity increase, river diversion, dam construction blocking spawning migration routes.</span>
+            <span class="sfsim-con-row-label">Primary Threats</span>
+            <span class="sfsim-con-row-val">Salinity increase, river diversion, dam construction blocking spawning migrations.</span>
           </div>
           <div class="sfsim-con-row">
             <span class="sfsim-con-row-label">IUCN Source</span>
@@ -795,7 +772,7 @@
         </div>
       </div>
 
-      <!-- Species B — Aral Barbel -->
+      <!-- Species B -->
       <div class="sfsim-con-card">
         <div class="sfsim-con-top">
           <div class="sfsim-con-sp-label">
@@ -805,22 +782,21 @@
           <span class="sfsim-con-common">Aral Barbel</span>
           <span class="sfsim-con-sci">Luciobarbus brachycephalus brachycephalus</span>
           <div class="sfsim-iucn-badge iucn-en">
-            <span class="sfsim-iucn-dot"></span>
-            Endangered (EN)
+            <span class="sfsim-iucn-dot"></span>Endangered (EN)
           </div>
         </div>
         <div class="sfsim-con-body">
           <div class="sfsim-con-row">
             <span class="sfsim-con-row-label">Salinity Tolerance</span>
-            <span class="sfsim-con-row-val">Moderate (up to ~18–20 g/L). Adapted to the original brackish Aral (baseline ~10 g/L) but physiologically stressed beyond this.</span>
+            <span class="sfsim-con-row-val">Moderate (up to ~18–20 g/L). Adapted to original brackish Aral (~10 g/L baseline) but physiologically stressed beyond this.</span>
           </div>
           <div class="sfsim-con-row">
             <span class="sfsim-con-row-label">Aral Sea Fate</span>
-            <span class="sfsim-con-row-val">Extirpated from the sea. Small populations persist in middle/upper Amu Darya and Zeravshan rivers only.</span>
+            <span class="sfsim-con-row-val">Extirpated from the sea. Small populations persist in the middle/upper Amu Darya and Zeravshan rivers.</span>
           </div>
           <div class="sfsim-con-row">
-            <span class="sfsim-con-row-label">Primary Threat</span>
-            <span class="sfsim-con-row-val">Salinity increase, dam construction, habitat fragmentation, overfishing of remaining riverine populations.</span>
+            <span class="sfsim-con-row-label">Primary Threats</span>
+            <span class="sfsim-con-row-val">Salinity increase, dam construction, habitat fragmentation, overfishing.</span>
           </div>
           <div class="sfsim-con-row">
             <span class="sfsim-con-row-label">IUCN Source</span>
@@ -829,7 +805,7 @@
         </div>
       </div>
 
-      <!-- Species C — Stickleback -->
+      <!-- Species C -->
       <div class="sfsim-con-card">
         <div class="sfsim-con-top">
           <div class="sfsim-con-sp-label">
@@ -839,22 +815,21 @@
           <span class="sfsim-con-common">Ninespine Stickleback</span>
           <span class="sfsim-con-sci">Pungitius platygaster aralensis</span>
           <div class="sfsim-iucn-badge iucn-lc">
-            <span class="sfsim-iucn-dot"></span>
-            Least Concern (LC)
+            <span class="sfsim-iucn-dot"></span>Least Concern (LC)
           </div>
         </div>
         <div class="sfsim-con-body">
           <div class="sfsim-con-row">
             <span class="sfsim-con-row-label">Salinity Tolerance</span>
-            <span class="sfsim-con-row-val">High (tolerates 28–35 g/L). The only native fish to persist in the Aral Sea throughout the regression crisis.</span>
+            <span class="sfsim-con-row-val">High (tolerates 28–35 g/L). The only native fish to persist throughout the Aral Sea regression crisis.</span>
           </div>
           <div class="sfsim-con-row">
             <span class="sfsim-con-row-label">Aral Sea Fate</span>
-            <span class="sfsim-con-row-val">Survived the salinity increase that killed all other native species. Has recolonised the North (Small) Aral Sea following partial restoration.</span>
+            <span class="sfsim-con-row-val">Survived total replacement of the native fish community. Recolonised the North Aral following partial restoration via the Kokaral Dam.</span>
           </div>
           <div class="sfsim-con-row">
             <span class="sfsim-con-row-label">Key Significance</span>
-            <span class="sfsim-con-row-val">Living evidence of natural selection under abiotic stress. Its survival is directly comparable to the simulation's Species C curve.</span>
+            <span class="sfsim-con-row-val">Living evidence of natural selection under abiotic stress — directly mirrors the Species C curve in this simulation.</span>
           </div>
           <div class="sfsim-con-row">
             <span class="sfsim-con-row-label">IUCN Source</span>
@@ -865,76 +840,34 @@
 
     </div><!-- /.sfsim-conservation-grid -->
 
-    <!-- IUCN category key -->
-    <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:7px;align-items:center;">
-      <span style="font-family:var(--sfsim-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--sfsim-text-muted);margin-right:4px;">IUCN Key:</span>
+    <div class="sfsim-iucn-key">
+      <span class="sfsim-iucn-key-label">IUCN Key:</span>
       <span class="sfsim-iucn-badge iucn-rex" style="font-size:10px;padding:3px 8px;">RE — Regionally Extinct</span>
       <span class="sfsim-iucn-badge iucn-en"  style="font-size:10px;padding:3px 8px;">EN — Endangered</span>
       <span class="sfsim-iucn-badge iucn-lc"  style="font-size:10px;padding:3px 8px;">LC — Least Concern</span>
     </div>
-  </div><!-- /.sfsim-conservation -->
+  </div>
 
-  <!-- ════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════
        REFERENCES
-       ════════════════════════════════════════════ -->
+       ══════════════════════════════════════════════ -->
   <div class="sfsim-references">
     <div class="sfsim-section-title">References</div>
     <ol class="sfsim-ref-list">
-
-      <li>
-        <span class="sfsim-ref-num">[1]</span>
-        <span>Plotnikov, I.S., Aladin, N.V., Ermakhanov, Z.K. &amp; Zhakova, L.V. (2019). The zoocenosis of the Aral Sea: six decades of fast-paced change. <em>Environmental Science and Pollution Research</em>, 26, 2601–2612.
-        <a href="https://doi.org/10.1007/s11356-018-3807-z" target="_blank" rel="noopener">doi:10.1007/s11356-018-3807-z &#8599;</a></span>
-      </li>
-
-      <li>
-        <span class="sfsim-ref-num">[2]</span>
-        <span>Aladin, N.V., Plotnikov, I.S. &amp; Filipov, A.A. (2022). Crustacean Fauna of the Aral Sea and its Relation to Ichthyofauna During the Modern Regression Crisis and Efforts at Restoration. <em>PMC / NCBI</em>.
-        <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8598976/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov &#8599;</a></span>
-      </li>
-
-      <li>
-        <span class="sfsim-ref-num">[3]</span>
-        <span>FAO Fisheries Technical Paper (1995). Fishery in the Lower Amu-Darya under the Impact of Irrigated Agriculture.
-        <a href="https://www.fao.org/4/v9529e/v9529e04.htm" target="_blank" rel="noopener">fao.org &#8599;</a></span>
-      </li>
-
-      <li>
-        <span class="sfsim-ref-num">[4]</span>
-        <span>Freshwater Ecoregions of the World (FEOW). Aral Sea Drainages — Ecoregion 629.
-        <a href="https://www.feow.org/ecoregions/details/629" target="_blank" rel="noopener">feow.org &#8599;</a></span>
-      </li>
-
-      <li>
-        <span class="sfsim-ref-num">[5]</span>
-        <span>Wikipedia contributors (2025). Aral Sea. <em>Wikipedia, The Free Encyclopedia</em>.
-        <a href="https://en.wikipedia.org/wiki/Aral_Sea" target="_blank" rel="noopener">en.wikipedia.org &#8599;</a></span>
-      </li>
-
-      <li>
-        <span class="sfsim-ref-num">[6]</span>
-        <span>IUCN Red List (2024). <em>Salmo trutta aralensis</em>.
-        <a href="https://www.iucnredlist.org/species/19861/9026045" target="_blank" rel="noopener">iucnredlist.org &#8599;</a></span>
-      </li>
-
-      <li>
-        <span class="sfsim-ref-num">[7]</span>
-        <span>IUCN Red List (2024). <em>Luciobarbus brachycephalus</em>.
-        <a href="https://www.iucnredlist.org/species/12143/174314373" target="_blank" rel="noopener">iucnredlist.org &#8599;</a></span>
-      </li>
-
-      <li>
-        <span class="sfsim-ref-num">[8]</span>
-        <span>IUCN Red List (2024). <em>Pungitius platygaster</em>.
-        <a href="https://www.iucnredlist.org/species/202617/18235041" target="_blank" rel="noopener">iucnredlist.org &#8599;</a></span>
-      </li>
-
+      <li><span class="sfsim-ref-num">[1]</span><span>Plotnikov, I.S., Aladin, N.V., Ermakhanov, Z.K. &amp; Zhakova, L.V. (2019). The zoocenosis of the Aral Sea: six decades of fast-paced change. <em>Environmental Science and Pollution Research</em>, 26, 2601–2612. <a href="https://doi.org/10.1007/s11356-018-3807-z" target="_blank" rel="noopener">doi:10.1007/s11356-018-3807-z &#8599;</a></span></li>
+      <li><span class="sfsim-ref-num">[2]</span><span>Aladin, N.V., Plotnikov, I.S. &amp; Filipov, A.A. (2022). Crustacean Fauna of the Aral Sea and its Relation to Ichthyofauna. <em>PMC / NCBI</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8598976/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov &#8599;</a></span></li>
+      <li><span class="sfsim-ref-num">[3]</span><span>FAO Fisheries Technical Paper (1995). Fishery in the Lower Amu-Darya under the Impact of Irrigated Agriculture. <a href="https://www.fao.org/4/v9529e/v9529e04.htm" target="_blank" rel="noopener">fao.org &#8599;</a></span></li>
+      <li><span class="sfsim-ref-num">[4]</span><span>Freshwater Ecoregions of the World (FEOW). Aral Sea Drainages — Ecoregion 629. <a href="https://www.feow.org/ecoregions/details/629" target="_blank" rel="noopener">feow.org &#8599;</a></span></li>
+      <li><span class="sfsim-ref-num">[5]</span><span>Wikipedia contributors (2025). Aral Sea. <em>Wikipedia, The Free Encyclopedia</em>. <a href="https://en.wikipedia.org/wiki/Aral_Sea" target="_blank" rel="noopener">en.wikipedia.org &#8599;</a></span></li>
+      <li><span class="sfsim-ref-num">[6]</span><span>IUCN Red List (2024). <em>Salmo trutta aralensis</em>. <a href="https://www.iucnredlist.org/species/19861/9026045" target="_blank" rel="noopener">iucnredlist.org &#8599;</a></span></li>
+      <li><span class="sfsim-ref-num">[7]</span><span>IUCN Red List (2024). <em>Luciobarbus brachycephalus</em>. <a href="https://www.iucnredlist.org/species/12143/174314373" target="_blank" rel="noopener">iucnredlist.org &#8599;</a></span></li>
+      <li><span class="sfsim-ref-num">[8]</span><span>IUCN Red List (2024). <em>Pungitius platygaster</em>. <a href="https://www.iucnredlist.org/species/202617/18235041" target="_blank" rel="noopener">iucnredlist.org &#8599;</a></span></li>
     </ol>
   </div>
 
-  <!-- ════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════
        FOOTER
-       ════════════════════════════════════════════ -->
+       ══════════════════════════════════════════════ -->
   <div class="sfsim-bottom-wrap">
     <div class="sfsim-footer">
       <div class="sfsim-footer-left">
@@ -942,9 +875,8 @@
         For classroom use. Survival curves are modelled approximations based on published ecological data.
         Species data sourced from IUCN Red List &amp; peer-reviewed literature.
       </div>
-      <div class="sfsim-footer-right">
+      <div>
         <a class="sfsim-contact-btn" href="mailto:mazojohn287@gmail.com?subject=Aral%20Sea%20Simulation%20Enquiry">
-          <!-- Inline SVG envelope icon — no external dependency -->
           <svg class="sfsim-contact-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
             <path d="M2 7l8 5 8-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -957,36 +889,33 @@
 
 </div><!-- /#sfsim-root -->
 
-<!-- ════════════════════════════════════════════
-     SIMULATION JAVASCRIPT (IIFE — no globals)
-     ════════════════════════════════════════════ -->
+<!-- ════════════════════════════════════════════════════════════
+     SIMULATION JAVASCRIPT
+     ════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
   'use strict';
 
-  var root = document.getElementById('sfsim-root');
-  if (!root) return;
+  /* ── DOM refs ── */
+  var canvas         = document.getElementById('sfsim-canvas');
+  var ctx            = canvas.getContext('2d');
+  var btnStart       = document.getElementById('sfsim-btnStart');
+  var salinitySlider = document.getElementById('sfsim-salinitySlider');
+  var repSlider      = document.getElementById('sfsim-repSlider');
+  var salinityValEl  = document.getElementById('sfsim-salinityVal');
+  var repValEl       = document.getElementById('sfsim-repVal');
+  var dayNumEl       = document.getElementById('sfsim-dayNum');
+  var statusDot      = document.getElementById('sfsim-statusDot');
+  var statusText     = document.getElementById('sfsim-statusText');
+  var completeMsg    = document.getElementById('sfsim-completeMsg');
+  var canvasWrap     = document.getElementById('sfsim-canvasWrap');
 
   function q(id) { return document.getElementById(id); }
 
-  var canvas         = q('sfsim-canvas');
-  var ctx            = canvas.getContext('2d');
-  var btnStart       = q('sfsim-btnStart');
-  var salinitySlider = q('sfsim-salinitySlider');
-  var repSlider      = q('sfsim-repSlider');
-  var salinityValEl  = q('sfsim-salinityVal');
-  var repValEl       = q('sfsim-repVal');
-  var dayNumEl       = q('sfsim-dayNum');
-  var statusDot      = q('sfsim-statusDot');
-  var statusText     = q('sfsim-statusText');
-  var completeMsg    = q('sfsim-completeMsg');
-  var canvasWrap     = q('sfsim-canvasWrap');
-
-  /* ── Base survival data (% at Day 14 for each salinity level)
-     Calibrated to match documented Aral Sea species behaviour:
-     A (S. trutta aralensis)          — freshwater salmonid, very low tolerance
-     B (L. brachycephalus)            — euryhaline cyprinid, moderate tolerance
-     C (P. platygaster aralensis)     — highly euryhaline, survived crisis     */
+  /* ── Base survival data ──
+     A = Salmo trutta aralensis       (freshwater, very low tolerance)
+     B = Luciobarbus brachycephalus   (euryhaline, moderate tolerance)
+     C = Pungitius platygaster aral.  (highly euryhaline, survived crisis) */
   var SALINITY_LEVELS = [0, 5, 10, 15, 20, 25, 30, 35];
   var BASE_SURVIVAL = {
     A: [100, 95, 80, 55, 30, 10,  5,  0],
@@ -994,10 +923,9 @@
     C: [100,100, 98, 96, 92, 88, 82, 75]
   };
 
-  // Graph line colours
   var COLORS = { A: '#e05c3a', B: '#3a7ab8', C: '#2d8a5e' };
 
-  // Simulation state
+  /* ── Simulation state ── */
   var simTimer      = null;
   var currentDay    = 0;
   var simData       = { A: [], B: [], C: [] };
@@ -1011,7 +939,7 @@
     repValEl.textContent = repSlider.value;
   });
 
-  /* ── Species toggle checkboxes ── */
+  /* ── Species checkbox toggles ── */
   ['A', 'B', 'C'].forEach(function (sp) {
     var cb    = q('sfsim-cb' + sp);
     var label = q('sfsim-toggle' + sp);
@@ -1021,7 +949,7 @@
     });
   });
 
-  /* ── Linear interpolation within base dataset ── */
+  /* ── Linear interpolation across base dataset ── */
   function interpolateSurvival(species, sal) {
     var levels = SALINITY_LEVELS;
     var data   = BASE_SURVIVAL[species];
@@ -1036,8 +964,7 @@
     return data[0];
   }
 
-  /* ── Build one replicate's 15-point curve (days 0–14) via logistic decay ──
-     randomFactor ∈ [-0.5, 0.5] shifts steepness & midpoint per replicate    */
+  /* ── Build one replicate curve (logistic decay, days 0–14) ── */
   function buildReplicateCurve(species, salinity, rf) {
     var finalSurvival = interpolateSurvival(species, salinity);
     var curve = [];
@@ -1053,7 +980,6 @@
     return smoothCurve(curve, 0.35);
   }
 
-  // Exponential moving-average smoother
   function smoothCurve(data, alpha) {
     var out = [data[0]];
     for (var i = 1; i < data.length; i++) {
@@ -1062,11 +988,9 @@
     return out;
   }
 
-  // Pre-compute all replicate and mean data before animation begins
   function initSimData(salinity, replicates) {
     simData       = { A: [], B: [], C: [] };
     replicateData = { A: [], B: [], C: [] };
-
     ['A', 'B', 'C'].forEach(function (sp) {
       var reps = [];
       for (var r = 0; r < replicates; r++) {
@@ -1080,12 +1004,12 @@
     });
   }
 
-  /* ── Canvas HiDPI sizing ── */
+  /* ── HiDPI canvas sizing ── */
   function resizeCanvas() {
     var dpr = window.devicePixelRatio || 1;
     var w   = canvasWrap.offsetWidth;
     var h   = canvasWrap.offsetHeight;
-    if (h < 10) h = 340;
+    if (h < 10) h = 300;
     canvas.width        = w * dpr;
     canvas.height       = h * dpr;
     canvas.style.width  = w + 'px';
@@ -1094,7 +1018,8 @@
     ctx.scale(dpr, dpr);
   }
 
-  // Respond to container size changes (ResizeObserver for WP safety)
+  /* Use ResizeObserver so the graph redraws cleanly when the
+     grid reflows from two-column → one-column on mobile */
   if (window.ResizeObserver) {
     new ResizeObserver(function () { resizeCanvas(); drawGraph(); }).observe(canvasWrap);
   } else {
@@ -1113,14 +1038,14 @@
   /* ── Draw graph ── */
   function drawGraph() {
     var W = canvas.offsetWidth  || canvasWrap.offsetWidth  || 500;
-    var H = canvas.offsetHeight || canvasWrap.offsetHeight || 340;
+    var H = canvas.offsetHeight || canvasWrap.offsetHeight || 300;
     ctx.clearRect(0, 0, W, H);
 
-    var PAD   = { top: 22, right: 22, bottom: 46, left: 50 };
+    var PAD   = { top: 22, right: 18, bottom: 46, left: 50 };
     var plotW = W - PAD.left - PAD.right;
     var plotH = H - PAD.top  - PAD.bottom;
 
-    // Grid
+    /* Grid */
     ctx.strokeStyle = '#ebebeb';
     ctx.lineWidth   = 1;
     ctx.setLineDash([4, 4]);
@@ -1132,7 +1057,7 @@
       ctx.lineTo(PAD.left + plotW, y);
       ctx.stroke();
       ctx.fillStyle = '#a09d95';
-      ctx.font = '11px "DM Mono", monospace';
+      ctx.font      = '11px "DM Mono", monospace';
       ctx.textAlign = 'right';
       ctx.fillText(pct + '%', PAD.left - 8, y + 4);
     });
@@ -1144,14 +1069,14 @@
       ctx.lineTo(x, PAD.top + plotH);
       ctx.stroke();
       ctx.fillStyle = '#a09d95';
-      ctx.font = '11px "DM Mono", monospace';
+      ctx.font      = '11px "DM Mono", monospace';
       ctx.textAlign = 'center';
       ctx.fillText('Day ' + d, x, PAD.top + plotH + 20);
     }
 
     ctx.setLineDash([]);
 
-    // Axes
+    /* Axes */
     ctx.strokeStyle = '#d0cdc5';
     ctx.lineWidth   = 1.5;
     ctx.beginPath();
@@ -1160,7 +1085,7 @@
     ctx.lineTo(PAD.left + plotW, PAD.top + plotH);
     ctx.stroke();
 
-    // Axis labels
+    /* Axis labels */
     ctx.fillStyle = '#6b6960';
     ctx.font      = '12px "DM Sans", sans-serif';
     ctx.textAlign = 'center';
@@ -1175,7 +1100,7 @@
 
     var days = Math.min(currentDay, 14);
 
-    // Replicate ghost trails
+    /* Replicate ghost trails */
     ['A', 'B', 'C'].forEach(function (sp) {
       if (!q('sfsim-cb' + sp).checked) return;
       replicateData[sp].forEach(function (rep) {
@@ -1192,7 +1117,7 @@
       });
     });
 
-    // Mean lines
+    /* Mean lines */
     ['A', 'B', 'C'].forEach(function (sp) {
       if (!q('sfsim-cb' + sp).checked) return;
       var data = simData[sp];
@@ -1209,7 +1134,7 @@
       }
       ctx.stroke();
 
-      // Leading dot
+      /* Leading dot */
       var ex = PAD.left + (days / 14) * plotW;
       var ey = PAD.top  + plotH * (1 - data[days] / 100);
       ctx.beginPath();
@@ -1222,25 +1147,20 @@
     });
   }
 
-  /* ── Update live readout panel ── */
+  /* ── Live readout panel ── */
   function updatePanel(day) {
     dayNumEl.textContent = day;
-
     var vals = {
       A: simData.A[day] !== undefined ? simData.A[day] : null,
       B: simData.B[day] !== undefined ? simData.B[day] : null,
       C: simData.C[day] !== undefined ? simData.C[day] : null
     };
-
-    var lowestSp  = null;
-    var lowestVal = Infinity;
+    var lowestSp = null, lowestVal = Infinity;
     ['A', 'B', 'C'].forEach(function (sp) {
       if (q('sfsim-cb' + sp).checked && vals[sp] !== null && vals[sp] < lowestVal) {
-        lowestVal = vals[sp];
-        lowestSp  = sp;
+        lowestVal = vals[sp]; lowestSp = sp;
       }
     });
-
     ['A', 'B', 'C'].forEach(function (sp) {
       var v = vals[sp];
       q('sfsim-val' + sp).textContent = v !== null ? v.toFixed(1) + '%' : '\u2014';
@@ -1249,27 +1169,25 @@
     });
   }
 
-  /* ── Single simulation step ── */
+  /* ── Simulation step ── */
   function stepSim() {
     currentDay++;
     drawGraph();
     updatePanel(currentDay);
-
     if (currentDay >= 14) {
-      clearInterval(simTimer);
-      simTimer = null;
+      clearInterval(simTimer); simTimer = null;
       btnStart.textContent   = '\u25B6 Start Simulation';
       btnStart.classList.remove('running');
       statusDot.className    = 'sfsim-status-dot complete';
       statusText.textContent = 'Complete';
       completeMsg.classList.add('visible');
+      sendHeight(); /* notify parent iframe immediately on completion */
     }
   }
 
   /* ── Start / Restart ── */
   btnStart.addEventListener('click', function () {
     if (simTimer) { clearInterval(simTimer); simTimer = null; }
-
     currentDay = 0;
     completeMsg.classList.remove('visible');
     ['A', 'B', 'C'].forEach(function (sp) {
@@ -1279,10 +1197,7 @@
     });
     dayNumEl.textContent = '0';
 
-    var salinity   = parseInt(salinitySlider.value, 10);
-    var replicates = parseInt(repSlider.value, 10);
-
-    initSimData(salinity, replicates);
+    initSimData(parseInt(salinitySlider.value, 10), parseInt(repSlider.value, 10));
     resizeCanvas();
     drawGraph();
     updatePanel(0);
@@ -1291,13 +1206,38 @@
     btnStart.classList.add('running');
     statusDot.className    = 'sfsim-status-dot running';
     statusText.textContent = 'Running\u2026';
-
     simTimer = setInterval(stepSim, 140);
   });
 
-  // Initial render
+  /* Initial render */
   resizeCanvas();
   drawGraph();
 
+  /* ════════════════════════════════════════════════════════
+     PART 1 — iframe auto-resizer (postMessage)
+     Sends the full document scroll height to the parent
+     frame on load, resize, and every 600ms so that Carrd
+     (or any host) can expand the iframe to fit all content
+     with no internal scrollbar.
+     ════════════════════════════════════════════════════════ */
+  function sendHeight() {
+    var h = Math.max(
+      document.body.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.scrollHeight,
+      document.documentElement.offsetHeight
+    );
+    try {
+      window.parent.postMessage({ sfSimHeight: h }, '*');
+    } catch (e) { /* silently ignore cross-origin errors */ }
+  }
+
+  window.addEventListener('load',   sendHeight);
+  window.addEventListener('resize', sendHeight);
+  /* Poll every 600ms to catch animation-driven height changes */
+  setInterval(sendHeight, 600);
+
 })();
 </script>
+</body>
+</html>
