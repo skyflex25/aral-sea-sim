@@ -62,18 +62,6 @@
       max-width: 720px;
       margin: 0 auto 32px;
     }
-    .sfsim-badge {
-      font-family: var(--sfsim-mono);
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--sfsim-accent);
-      background: var(--sfsim-accent-lt);
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 100px;
-      margin-bottom: 14px;
-    }
     .sfsim-header h1 {
       font-size: clamp(20px, 4vw, 30px);
       font-weight: 600;
@@ -489,80 +477,133 @@
     .sfsim-con-row-val { font-size: 12px; color: var(--sfsim-text); line-height: 1.5; }
     .sfsim-con-row-val a { color: var(--sfsim-accent); font-size: 11px; }
 
+
+
     /* ══════════════════════════════════════════════
-       REFERENCES
+       TABBED DATA TABLE
        ══════════════════════════════════════════════ */
-    .sfsim-references {
+    .sfsim-table-section {
+      display: none;           /* hidden until simulation completes */
       margin-top: 20px;
-      padding: 20px 22px;
       background: var(--sfsim-surface);
       border: 1px solid var(--sfsim-border);
       border-radius: var(--sfsim-radius);
       box-shadow: var(--sfsim-shadow);
+      padding: 22px 22px 18px;
+      animation: sfsim-fadein 0.4s ease;
     }
-    .sfsim-ref-list {
-      list-style: none;
-      margin: 6px 0 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .sfsim-table-section.visible { display: block; }
+
+    @keyframes sfsim-fadein {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    .sfsim-ref-list li {
+
+    /* Tab bar */
+    .sfsim-tab-bar {
       display: flex;
-      gap: 10px;
+      gap: 6px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .sfsim-tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border: 1px solid var(--sfsim-border);
+      border-radius: 7px;
+      background: var(--sfsim-surface2);
+      cursor: pointer;
+      font-family: var(--sfsim-sans);
       font-size: 12px;
+      font-weight: 500;
       color: var(--sfsim-text-sec);
-      line-height: 1.55;
-      margin: 0; padding: 0;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
     }
-    .sfsim-ref-num {
-      font-family: var(--sfsim-mono);
-      font-size: 10px;
-      color: var(--sfsim-text-muted);
-      min-width: 20px;
-      padding-top: 2px;
+    .sfsim-tab:hover { background: #e8e6e0; }
+    .sfsim-tab.active {
+      background: var(--sfsim-text);
+      border-color: var(--sfsim-text);
+      color: #fff;
+    }
+    .sfsim-tab-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
       flex-shrink: 0;
     }
-    .sfsim-ref-list a  { color: var(--sfsim-accent); word-break: break-all; }
-    .sfsim-ref-list em { font-style: italic; }
+    .sfsim-tab-dot.a { background: var(--sfsim-sp-a); }
+    .sfsim-tab-dot.b { background: var(--sfsim-sp-b); }
+    .sfsim-tab-dot.c { background: var(--sfsim-sp-c); }
+    /* Dim dot when tab is active (white text bg) */
+    .sfsim-tab.active .sfsim-tab-dot.a { background: #f0937a; }
+    .sfsim-tab.active .sfsim-tab-dot.b { background: #7ab3d8; }
+    .sfsim-tab.active .sfsim-tab-dot.c { background: #5db890; }
+    .sfsim-tab-label { font-weight: 600; font-size: 12px; }
+    .sfsim-tab-sci   { font-style: italic; font-size: 10px; opacity: 0.72; }
+    @media (max-width: 480px) { .sfsim-tab-sci { display: none; } }
 
-    /* ══════════════════════════════════════════════
-       FOOTER
-       ══════════════════════════════════════════════ */
-    .sfsim-footer {
-      margin-top: 20px;
-      padding: 18px 22px;
-      background: var(--sfsim-text);
-      border-radius: var(--sfsim-radius);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .sfsim-footer-left { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.5; }
-    .sfsim-footer-left strong { color: rgba(255,255,255,0.85); font-weight: 500; display: block; font-size: 13px; margin-bottom: 2px; }
-    .sfsim-contact-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 16px;
-      background: var(--sfsim-accent);
-      color: #fff;
+    /* Table scroll wrapper — horizontal scroll on narrow screens */
+    .sfsim-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       border-radius: 7px;
-      font-family: 'DM Sans', system-ui, sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: background 0.15s;
+      border: 1px solid var(--sfsim-border);
+    }
+
+    /* Data table */
+    .sfsim-data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--sfsim-mono);
+      font-size: 12px;
+      min-width: 420px;       /* ensures columns are readable before scroll kicks in */
+    }
+    .sfsim-data-table thead tr {
+      background: var(--sfsim-surface2);
+    }
+    .sfsim-data-table th {
+      padding: 9px 12px;
+      text-align: right;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sfsim-text-muted);
+      border-bottom: 1px solid var(--sfsim-border);
       white-space: nowrap;
     }
-    .sfsim-contact-btn:hover { background: #3a7234; color: #fff; text-decoration: none; }
-    .sfsim-contact-icon { width: 15px; height: 15px; flex-shrink: 0; }
-
-    /* Bottom padding so footer never clips in iframe */
-    .sfsim-bottom-wrap { padding-bottom: 48px; }
+    .sfsim-data-table th:first-child { text-align: left; }
+    .sfsim-data-table td {
+      padding: 7px 12px;
+      text-align: right;
+      color: var(--sfsim-text-sec);
+      border-bottom: 1px solid #f0efe9;
+      white-space: nowrap;
+    }
+    .sfsim-data-table td:first-child {
+      text-align: left;
+      font-weight: 500;
+      color: var(--sfsim-text-muted);
+    }
+    /* Mean column — always rightmost, slightly highlighted */
+    .sfsim-data-table td.mean-col,
+    .sfsim-data-table th.mean-col {
+      color: var(--sfsim-text);
+      font-weight: 600;
+      background: rgba(45,90,39,0.04);
+      border-left: 1px solid var(--sfsim-border);
+    }
+    /* Zebra stripe */
+    .sfsim-data-table tbody tr:nth-child(even) td { background: #fafaf8; }
+    .sfsim-data-table tbody tr:nth-child(even) td.mean-col { background: rgba(45,90,39,0.06); }
+    /* Last row — no bottom border */
+    .sfsim-data-table tbody tr:last-child td { border-bottom: none; }
+    /* Colour-coded mean value based on species */
+    .sfsim-data-table .sp-a { color: var(--sfsim-sp-a); }
+    .sfsim-data-table .sp-b { color: var(--sfsim-sp-b); }
+    .sfsim-data-table .sp-c { color: var(--sfsim-sp-c); }
 
     /* ══════════════════════════════════════════════
        IUCN key chips row
@@ -590,7 +631,6 @@
 
   <!-- ── Header ── -->
   <div class="sfsim-header">
-    <div class="sfsim-badge">IB Biology · Aral Sea Case Study</div>
     <h1>Salinity &amp; Fish Survival — Aral Sea</h1>
     <p>Simulate differential survival of three native Aral Sea species as salinity increases over 14 days.
     Based on documented extinction and survival patterns from the Aral Sea regression crisis (1960s–2000s).</p>
@@ -731,6 +771,42 @@
     </div>
 
   </div><!-- /.sfsim-layout -->
+
+  <!-- ══════════════════════════════════════════════
+       TABBED DATA TABLE
+       Shown only after simulation completes (Day 14).
+       One tab per species; rows = days 0–14,
+       columns = each replicate + mean.
+       ══════════════════════════════════════════════ -->
+  <div class="sfsim-table-section" id="sfsim-tableSection">
+    <div class="sfsim-section-title" style="margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--sfsim-border);">
+      Day-by-Day Survival Data
+    </div>
+
+    <!-- Tab buttons -->
+    <div class="sfsim-tab-bar" role="tablist">
+      <button class="sfsim-tab active" id="sfsim-tabBtnA" role="tab" aria-selected="true"  data-sp="A">
+        <span class="sfsim-tab-dot a"></span>
+        <span class="sfsim-tab-label">Aral Trout</span>
+        <span class="sfsim-tab-sci">S. trutta aralensis</span>
+      </button>
+      <button class="sfsim-tab" id="sfsim-tabBtnB" role="tab" aria-selected="false" data-sp="B">
+        <span class="sfsim-tab-dot b"></span>
+        <span class="sfsim-tab-label">Aral Barbel</span>
+        <span class="sfsim-tab-sci">L. brachycephalus</span>
+      </button>
+      <button class="sfsim-tab" id="sfsim-tabBtnC" role="tab" aria-selected="false" data-sp="C">
+        <span class="sfsim-tab-dot c"></span>
+        <span class="sfsim-tab-label">Stickleback</span>
+        <span class="sfsim-tab-sci">P. platygaster aralensis</span>
+      </button>
+    </div>
+
+    <!-- Table panels — one per species -->
+    <div class="sfsim-tab-panel" id="sfsim-panelA"></div>
+    <div class="sfsim-tab-panel" id="sfsim-panelB" style="display:none;"></div>
+    <div class="sfsim-tab-panel" id="sfsim-panelC" style="display:none;"></div>
+  </div>
 
   <!-- ══════════════════════════════════════════════
        CONSERVATION STATUS
@@ -1133,6 +1209,80 @@
     });
   }
 
+  /* ══════════════════════════════════════════════
+     TABBED DATA TABLE — built once on completion
+     ══════════════════════════════════════════════ */
+
+  var tableSection = document.getElementById('sfsim-tableSection');
+  var SP_COLORS    = { A: 'sp-a', B: 'sp-b', C: 'sp-c' };
+  var SP_NAMES     = {
+    A: 'Aral Trout',
+    B: 'Aral Barbel',
+    C: 'Ninespine Stickleback'
+  };
+
+  /* Build the HTML table for one species and inject into its panel */
+  function buildTableForSpecies(sp) {
+    var panel = document.getElementById('sfsim-panel' + sp);
+    var reps  = replicateData[sp];   /* array of replicate curves */
+    var means = simData[sp];         /* mean curve */
+    var numReps = reps.length;
+    var colorClass = SP_COLORS[sp];
+
+    /* ── Header row ── */
+    var headCells = '<th>Day</th>';
+    for (var r = 0; r < numReps; r++) {
+      headCells += '<th>Trial ' + (r + 1) + '</th>';
+    }
+    headCells += '<th class="mean-col">Mean</th>';
+
+    /* ── Data rows (days 0–14) ── */
+    var bodyRows = '';
+    for (var day = 0; day <= 14; day++) {
+      bodyRows += '<tr><td>Day ' + day + '</td>';
+      for (var ri = 0; ri < numReps; ri++) {
+        bodyRows += '<td>' + reps[ri][day].toFixed(1) + '</td>';
+      }
+      bodyRows += '<td class="mean-col ' + colorClass + '">' + means[day].toFixed(1) + '</td>';
+      bodyRows += '</tr>';
+    }
+
+    panel.innerHTML =
+      '<div class="sfsim-table-wrap">' +
+        '<table class="sfsim-data-table">' +
+          '<thead><tr>' + headCells + '</tr></thead>' +
+          '<tbody>' + bodyRows + '</tbody>' +
+        '</table>' +
+      '</div>';
+  }
+
+  /* Build all three tables and reveal the section */
+  function buildAllTables() {
+    ['A', 'B', 'C'].forEach(buildTableForSpecies);
+    tableSection.classList.add('visible');
+    /* Ensure correct tab is shown (A by default) */
+    showTab('A');
+  }
+
+  /* Tab switching */
+  function showTab(sp) {
+    ['A', 'B', 'C'].forEach(function (s) {
+      var btn   = document.getElementById('sfsim-tabBtn' + s);
+      var panel = document.getElementById('sfsim-panel' + s);
+      var active = (s === sp);
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      panel.style.display = active ? '' : 'none';
+    });
+  }
+
+  /* Wire up tab buttons */
+  ['A', 'B', 'C'].forEach(function (sp) {
+    document.getElementById('sfsim-tabBtn' + sp).addEventListener('click', function () {
+      showTab(sp);
+    });
+  });
+
   /* ── Simulation step ── */
   function stepSim() {
     currentDay++;
@@ -1145,6 +1295,7 @@
       statusDot.className    = 'sfsim-status-dot complete';
       statusText.textContent = 'Complete';
       completeMsg.classList.add('visible');
+      buildAllTables();
       sendHeight(); /* notify parent iframe immediately on completion */
     }
   }
@@ -1154,6 +1305,11 @@
     if (simTimer) { clearInterval(simTimer); simTimer = null; }
     currentDay = 0;
     completeMsg.classList.remove('visible');
+    /* Hide and clear the data table for fresh run */
+    tableSection.classList.remove('visible');
+    ['A', 'B', 'C'].forEach(function (sp) {
+      document.getElementById('sfsim-panel' + sp).innerHTML = '';
+    });
     ['A', 'B', 'C'].forEach(function (sp) {
       q('sfsim-val' + sp).textContent = '\u2014';
       q('sfsim-bar' + sp).style.width = '0%';
